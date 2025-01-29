@@ -1,4 +1,5 @@
 const axios = require('axios');
+require('dotenv').config();
 
 const createResponse = (status, message, data = null) => {
     return {
@@ -20,8 +21,11 @@ const convertImageToBase64 = (file) => {
 };
 
 
-const sendSms = async (apiToken, username, text, receiver) => {
+const sendSms = async (text, receiver) => {
     try {
+        const apiToken = process.env.API_TOKEN;
+        const username = process.env.USERNAME; 
+
         const url = `http://192.168.1.16:8000/api/sendsms/`;
 
         const response = await axios.get(url, {
@@ -38,5 +42,6 @@ const sendSms = async (apiToken, username, text, receiver) => {
         throw new Error(`Error sending SMS: ${error.message}`);
     }
 };
+
 
 module.exports = {createResponse, sendSms, convertImageToBase64};

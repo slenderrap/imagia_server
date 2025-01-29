@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: Mi API
+  version: 1.0.0
+  description: API para gestionar usuarios y analizar imágenes.
+servers:
+  - url: http://0.0.0.0:3000
+    description: Servidor local
+paths:
+  /api/usuaris/registrar:
+    post:
+      summary: Registrar un nuevo usuario
+      description: Registra un nuevo usuario con su teléfono, nickname, email y contraseña.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                telefon:
+                  type: string
+                  description: Número de teléfono del usuario.
+                nickname:
+                  type: string
+                  description: Nombre de usuario.
+                email:
+                  type: string
+                  format: email
+                  description: Correo electrónico del usuario.
+                contrasenya:
+                  type: string
+                  description: Contraseña del usuario.
+              required:
+                - telefon
+                - nickname
+                - email
+                - contrasenya
+      responses:
+        '200':
+          description: Usuario registrado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: Usuari registrat correctament
+                  data:
+                    type: object
+                    properties:
+                      nom:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        example: johndoe@example.com
+
+  /api/usuaris/validar:
+    post:
+      summary: Validar un usuario
+      description: Valida un usuario con su teléfono y código de validación.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                telefon:
+                  type: string
+                  description: Número de teléfono del usuario.
+                codi_validacio:
+                  type: string
+                  description: Código de validación.
+              required:
+                - telefon
+                - codi_validacio
+      responses:
+        '200':
+          description: Usuario validado correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: Usuari validat correctament
+                  data:
+                    type: object
+                    properties:
+                      api_key:
+                        type: string
+                        example: 1234567890
+
+  /api/usuaris/perfil:
+    get:
+      summary: Obtener el perfil del usuario
+      description: Obtiene el perfil del usuario autenticado.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Perfil del usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: Perfil del usuario
+                  data:
+                    type: object
+                    properties:
+                      nom:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        example: johndoe@example.com
+
+  /api/analitzar-imatge:
+    post:
+      summary: Analizar una imagen
+      description: Analiza una imagen utilizando un modelo de visión artificial.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: Descripción de la tarea a realizar con la imagen.
+                stream:
+                  type: boolean
+                  description: Indica si la respuesta debe ser transmitida en tiempo real.
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Lista de imágenes en formato base64.
+              required:
+                - prompt
+                - images
+      responses:
+        '200':
+          description: Imagen analizada correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: Maria image processed
+                  data:
+                    type: string
+                    example: "Resultado del análisis de la imagen"
+        '400':
+          description: Datos de entrada inválidos.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ERROR
+                  message:
+                    type: string
+                    example: Invalid input data
+
+  /api:
+    get:
+      summary: Verificar el estado de la API
+      description: Verifica si la API está funcionando correctamente.
+      responses:
+        '200':
+          description: API funcionando correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: API working correctly
+
+securitySchemes:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: Clave API para autenticación.

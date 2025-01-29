@@ -183,6 +183,23 @@ const verifyAdminToken = async (token) => {
     }
 };
 
+const getUserIdFromToken = async (token) => {
+    try {
+        const user = await User.findOne({
+            where: { tokens: token },
+            attributes: ['id'],
+            raw: true
+        });
+        
+        if (user) {
+            return user.id;
+        } else {
+            throw new Error('Token not found');
+        }
+    } catch (error) {
+        throw new Error(`Error getting userId from token: ${error.message}`);
+    }
+};
 
 module.exports = {
     createUser,
@@ -195,5 +212,6 @@ module.exports = {
     getAllUsers,
     addTokenToUser,
     getTokenFromUser,
+    getUserIdFromToken,
     verifyUserAndPassword
 };

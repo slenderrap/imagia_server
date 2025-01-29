@@ -108,6 +108,82 @@ const createRequest = async (
     }
 };
 
+
+const verifyUserAndPassword = async (username, password) => {
+    try {
+        const user = await User.findOne({
+            where: { username, password },
+            attributes: ['id', 'tokens'],
+            raw: true
+        });
+        if (user) {
+            return user.tokens;
+        } else {
+            throw new Error('Invalid username or password');
+        }
+    } catch (error) {
+        throw new Error(`Error verifying user and password: ${error.message}`);
+    }
+};
+
+const getAllUsers = async () => {
+    try {
+        const users = await User.findAll({
+            raw: true
+        });
+        return users;
+    } catch (error) {
+        throw new Error(`Error getting all users: ${error.message}`);
+    }
+};
+
+const addTokenToUser = async (userId, token) => {
+    try {
+        const user = await User.findByPk(userId);
+        
+        if (user) {
+
+            user.tokens = token;
+            await user.save();
+        } else {
+            throw new Error('User not found');
+        }
+    } catch (error) {
+        throw new Error(`Error adding token to user: ${error.message}`);
+    }
+};
+
+const getTokenFromUser = async (userId) => {
+    try {
+        const user = await User.findByPk(userId, {
+            attributes: ['tokens'],
+            raw: true
+        });
+        return user ? user.tokens : null;
+    } catch (error) {
+        throw new Error(`Error getting token from user: ${error.message}`);
+    }
+};
+
+const verifyAdminToken = async (token) => {
+    try {
+        const user = await User.findOne({
+            where: { tokens: token },
+            attributes: ['role'],
+            raw: true
+        });
+        
+        if (user && user.role === 'admin') {
+            return true;
+        } else {
+            throw new Error('Token does not belong to an admin user');
+        }
+    } catch (error) {
+        throw new Error(`Error verifying admin token: ${error.message}`);
+    }
+};
+
+
 module.exports = {
     createUser,
     deactivateUser,
@@ -115,5 +191,9 @@ module.exports = {
     createRequest,
     getUserRequests,
     getUserRole,
-    getUserPassword
+    getUserPassword,
+    getAllUsers,
+    addTokenToUser,
+    getTokenFromUser,
+    verifyUserAndPassword
 };

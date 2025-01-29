@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 const createResponse = (status, message, data = null) => {
     return {
         status: status,
@@ -17,5 +19,24 @@ const convertImageToBase64 = (file) => {
     });
 };
 
-  
-module.exports = {createResponse, convertImageToBase64};
+
+const sendSms = async (apiToken, username, text, receiver) => {
+    try {
+        const url = `http://192.168.1.16:8000/api/sendsms/`;
+
+        const response = await axios.get(url, {
+            params: {
+                api_token: apiToken,
+                username: username,
+                text: text,
+                receiver: receiver
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error sending SMS: ${error.message}`);
+    }
+};
+
+module.exports = {createResponse, sendSms, convertImageToBase64};

@@ -87,24 +87,15 @@ app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res
     }
 });
 
-app.post('/api/admin/usuaris', [authMiddleware], async (req, res) => {
+app.get('/api/admin/usuaris', [authMiddleware], async (req, res) => {
     try {
-        const { token } = req.body;
-        if (!token) {
-            return res.status(400).send(createResponse("ERROR", "Token not provided"));
-        }
-        const isAdmin = await verifyAdminToken(token);
-        if (!isAdmin) {
-            return res.status(403).send(createResponse("ERROR", "Token does not belong to an admin"));
-        }
         const users = await getAllUsers();
-        res.send(createResponse("OK", "Users fetched successfull", users));
-            } catch (error) {
+        res.send(createResponse("OK", "Users fetched successfully", users));
+    } catch (error) {
         console.error(error);
         res.status(500).send(createResponse("ERROR", `Error fetching users: ${error.message}`));
     }
 });
-
 
 //todo
 app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});

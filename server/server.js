@@ -87,3 +87,50 @@ app.get("/api", (req, res) => {
       console.error('Error al inicializar la base de datos:', error);
     }
   })();
+
+
+
+
+app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res) => {
+    try {
+        const { token, username, plan } = req.body;
+        if (!token || !username || !plan) {
+            return res.status(400).send(createResponse("ERROR", "Token, username, and plan must be provided"));
+        }
+        const isAdmin = await verifyAdminToken(token);
+        if (!isAdmin) {
+            return res.status(403).send(createResponse("ERROR", "Token does not belong to an admin"));
+        }
+        const user = await User.findOne({ where: { username }, raw: true });
+        if (!user) {
+            return res.status(404).send(createResponse("ERROR", "User not found"));
+        }
+        const validRoles = ['free', 'premium', 'admin'];
+        if (!validRoles.includes(plan)) {
+            return res.status(400).send(createResponse("ERROR", "Invalid role provided"));
+        }
+
+        await changeUserRole(user.id, plan);
+        res.send(createResponse("OK", "User plan updated successfully", { username, plan }));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Error updating user plan: ${error.message}`));
+    }
+});
+
+app.get('/api/admin/usuaris', [authMiddleware], async (req, res) => {
+    try {
+        const users = await getAllUsers();
+        res.send(createResponse("OK", "Users fetched successfully", users));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Error fetching users: ${error.message}`));
+    }
+});
+
+//todo
+app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});
+app.get('/api/admin/usuaris/quota', [authMiddleware], (req, res) => {});
+app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], (req, res) => {});
+app.post('/api/usuaris/validar', (req, res) => {});
+app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {});

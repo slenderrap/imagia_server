@@ -17,19 +17,6 @@ app.post('/api/usuaris/registrar', (req, res) => {
     res.send(createResponse("OK", "Usuari registrat correctament", {"nom": nickname, "email": email}));
 });
 
-// Endpoint to validate a user
-app.post('/api/usuaris/validar', (req, res) => {
-    const {telefon, codi_validacio} = req.body;
-    // TODO: Implementar la lògica per validar un usuari
-    throw new Error("Not implemented yet");
-    generatedApiKey = "1234567890"; // TODO: Generar una clau API vàlida
-    res.send(createResponse("OK", "Usuari validat correctament", {"api_key": generatedApiKey}));
-});
-
-app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {
-    // TODO: Implementar la lògica per obtenir el perfil de l'usuari
-    
-});
 
 // Endpoint to analyze an image
 app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
@@ -70,14 +57,58 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
     }
   })();
 
-  
-  app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});
-  
-  app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], (req, res) => {});
-  
-  app.get('/api/admin/usuaris/quota', [authMiddleware], (req, res) => {});
-  
-  app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], (req, res) => {});
-  
-  app.get('/api/admin/usuaris', [authMiddleware], (req, res) => {});
-  
+
+
+
+app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res) => {
+    try {
+        const { token, username, plan } = req.body;
+        if (!token || !username || !plan) {
+            return res.status(400).send(createResponse("ERROR", "Token, username, and plan must be provided"));
+        }
+        const isAdmin = await verifyAdminToken(token);
+        if (!isAdmin) {
+            return res.status(403).send(createResponse("ERROR", "Token does not belong to an admin"));
+        }
+        const user = await User.findOne({ where: { username }, raw: true });
+        if (!user) {
+            return res.status(404).send(createResponse("ERROR", "User not found"));
+        }
+        const validRoles = ['free', 'premium', 'admin'];
+        if (!validRoles.includes(plan)) {
+            return res.status(400).send(createResponse("ERROR", "Invalid role provided"));
+        }
+
+        await changeUserRole(user.id, plan);
+        res.send(createResponse("OK", "User plan updated successfully", { username, plan }));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Error updating user plan: ${error.message}`));
+    }
+});
+
+app.post('/api/admin/usuaris', [authMiddleware], async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).send(createResponse("ERROR", "Token not provided"));
+        }
+        const isAdmin = await verifyAdminToken(token);
+        if (!isAdmin) {
+            return res.status(403).send(createResponse("ERROR", "Token does not belong to an admin"));
+        }
+        const users = await getAllUsers();
+        res.send(createResponse("OK", "Users fetched successfull", users));
+            } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Error fetching users: ${error.message}`));
+    }
+});
+
+
+//todo
+app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});
+app.get('/api/admin/usuaris/quota', [authMiddleware], (req, res) => {});
+app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], (req, res) => {});
+app.post('/api/usuaris/validar', (req, res) => {});
+app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {});

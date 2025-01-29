@@ -20,7 +20,6 @@ const convertImageToBase64 = (file) => {
     });
 };
 
-
 const sendSms = async (text, receiver) => {
     try {
         const apiToken = process.env.API_TOKEN;

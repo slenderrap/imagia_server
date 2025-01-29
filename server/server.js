@@ -69,3 +69,15 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
       console.error('Error al inicializar la base de datos:', error);
     }
   })();
+
+  
+  app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});
+  
+  app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], (req, res) => {});
+  
+  app.get('/api/admin/usuaris/quota', [authMiddleware], (req, res) => {});
+  
+  app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], (req, res) => {});
+  
+  app.get('/api/admin/usuaris', [authMiddleware], (req, res) => {});
+  

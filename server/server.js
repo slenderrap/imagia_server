@@ -20,8 +20,34 @@ app.get('/api/api-docs', (req, res) => {
 // Endpoint to register a user
 app.post('/api/usuaris/registrar', (req, res) => {
     const {telefon, nickname, email, contrasenya} = req.body;
-    createUser( nickname, email, contrasenya, telefon, nickname, null);
-    res.send(createResponse("OK", "Usuari registrat correctament", {"nom": nickname, "email": email}));
+    const token = Math.floor(Math.random() * 9000000000) + 1000000000;
+    createUser( nickname, email, contrasenya, telefon, nickname, token);
+    res.send(createResponse("OK", "Usuari registrats correctament", {"nom": nickname, "email": email}));
+});
+
+//Endpoint for login
+app.post('/api/admin/usuaris/login', [authMiddleware], async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).send(createResponse("ERROR", "Username and password must be provided"));
+        }
+
+        const token = await verifyUserAndPassword(username, password);
+        const isAdmin = await verifyAdminToken(token);
+
+        if (isAdmin) {
+            return res.send(createResponse("OK", "Admin login successful", { token }));
+        } else {
+            // Pass para usuarios no admin - to do-
+            return res.status(403).send(createResponse("ERROR", "User is not an admin"));
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Login error: ${error.message}`));
+    }
 });
 
 // Endpoint to validate a user
@@ -33,6 +59,7 @@ app.post('/api/usuaris/validar', (req, res) => {
     res.send(createResponse("OK", "Usuari validat correctament", {"api_key": generatedApiKey}));
 });
 
+//Endpoint  to get user's profile
 app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {
     // TODO: Implementar la lògica per obtenir el perfil de l'usuari
     res.send("Not implemented yet");
@@ -90,7 +117,7 @@ app.get("/api", (req, res) => {
 
 
 
-
+//Endpoint to update acount type: Admin, Premium,, Free
 app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res) => {
     try {
         const { token, username, plan } = req.body;
@@ -118,6 +145,7 @@ app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res
     }
 });
 
+//Endpoint to list users
 app.get('/api/admin/usuaris', [authMiddleware], async (req, res) => {
     try {
         const users = await getAllUsers();
@@ -132,5 +160,3 @@ app.get('/api/admin/usuaris', [authMiddleware], async (req, res) => {
 app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});
 app.get('/api/admin/usuaris/quota', [authMiddleware], (req, res) => {});
 app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], (req, res) => {});
-app.post('/api/usuaris/validar', (req, res) => {});
-app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {});

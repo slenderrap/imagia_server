@@ -39,9 +39,15 @@ const createUserModel = () => {
       type: DataTypes.ENUM('free', 'premium', 'admin'),
       defaultValue: 'free'
     },
+
+    sms: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null
+  }
     is_active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true
+      defaultValue: false
     }
   }, {
     tableName: 'user'

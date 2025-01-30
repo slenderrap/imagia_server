@@ -18,11 +18,20 @@ app.get('/api/api-docs', (req, res) => {
 });
 
 // Endpoint to register a user
-app.post('/api/usuaris/registrar', (req, res) => {
-    const {telefon, nickname, email, contrasenya} = req.body;
-    const token = Math.floor(Math.random() * 9000000000) + 1000000000;
-    createUser( nickname, email, contrasenya, telefon, nickname, token);
-    res.send(createResponse("OK", "Usuari registrats correctament", {"nom": nickname, "email": email}));
+app.post('/api/usuaris/registrar', async (req, res) => {
+    try {
+        const {telefon, nickname, email, contrasenya} = req.body;
+        
+        if (!telefon || !nickname || !email || !contrasenya) {
+            return res.status(400).send(createResponse("ERROR", "All fields are required"));
+        }
+
+        await createUser(nickname, email, contrasenya, telefon, nickname, null, null);
+        res.send(createResponse("OK", "User registered successfully", {"name": nickname, "email": email}));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Registration error: ${error.message}`));
+    }
 });
 
 //Endpoint for login
@@ -47,12 +56,43 @@ app.post('/api/admin/usuaris/login', [authMiddleware], async (req, res) => {
 });
 
 // Endpoint to validate a user
-app.post('/api/usuaris/validar', (req, res) => {
-    const {telefon, codi_validacio} = req.body;
-    // TODO: Implementar la lògica per validar un usuari
-    throw new Error("Not implemented yet");
-    generatedApiKey = "1234567890"; // TODO: Generar una clau API vàlida
-    res.send(createResponse("OK", "Usuari validat correctament", {"api_key": generatedApiKey}));
+app.post('/api/usuaris/validar', async (req, res) => {
+    try {
+        const { username } = req.body;
+        if (!username) {
+            return res.status(400).send(createResponse("ERROR", "Username is required"));
+        }
+        const smsCode = Math.floor(100000 + Math.random() * 900000);
+        await addSmsToUser(username, smsCode);
+        const phoneNumber = await getUserPhone(username);
+        const message = `Enter+this+code+to+validate+your+account:+${smsCode}`;
+        await sendSms(message, phoneNumber);
+        res.send(createResponse("OK", "Validation SMS sent successfully"));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Validation error: ${error.message}`));
+    }
+});
+
+//validar sms
+app.post('/api/usuaris/sms', async (req, res) => {
+    try {
+        const { username, sms } = req.body;
+        if (!username || !sms) {
+            return res.status(400).send(createResponse("ERROR", "Username and SMS code are required"));
+        }
+        const isValidSms = await verifySmsFromUser(username, sms);
+                if (!isValidSms) {
+            return res.status(400).send(createResponse("ERROR", "Invalid SMS code"));
+        }
+        const token = Math.floor(1000000000 + Math.random() * 9000000000);
+        await addTokenToUser(username, token);
+        await activateUser(username);
+        res.send(createResponse("OK", "User validated successfully", { token }));
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(createResponse("ERROR", `Validation error: ${error.message}`));
+    }
 });
 
 //Endpoint  to get user's profile
@@ -133,7 +173,7 @@ app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res
             return res.status(400).send(createResponse("ERROR", "Invalid role provided"));
         }
 
-        await changeUserRole(user.id, plan);
+        await changeUserRole(username, plan);
         res.send(createResponse("OK", "User plan updated successfully", { username, plan }));
     } catch (error) {
         console.error(error);

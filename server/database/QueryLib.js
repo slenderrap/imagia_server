@@ -1,42 +1,5 @@
 const {User, Request} = require('./index');
 
-const getUserRequests = async (userId) => {
-    try {
-        const requests = await Request.findAll({
-            where: { user_id: userId },
-            order: [['prompt_date', 'DESC']],
-            raw: true
-        });
-        return requests;
-    } catch (error) {
-        throw new Error(`Error getting user requests: ${error.message}`);
-    }
-};
-
-const getUserRole = async (userId) => {
-    try {
-        const user = await User.findByPk(userId, {
-            attributes: ['role'],
-            raw: true
-        });
-        return user;
-    } catch (error) {
-        throw new Error(`Error getting user role: ${error.message}`);
-    }
-};
-
-const getUserPassword = async (userId) => {
-    try {
-        const user = await User.findByPk(userId, {
-            attributes: ['password'],
-            raw: true
-        });
-        return user;
-    } catch (error) {
-        throw new Error(`Error getting user password: ${error.message}`);
-    }
-};
-
 
 const createUser = async (
     username, 
@@ -44,9 +7,18 @@ const createUser = async (
     password, 
     phone_number, 
     nickname = null,
-    tokens = null
-) => {
+    tokens = null,
+    sms = null
+ ) => {
     try {
+        const existingUsername = await User.findOne({ 
+            where: { username }
+        });
+        
+        if (existingUsername) {
+            throw new Error('Username already exists');
+        }
+ 
         return await User.create({
             username,
             email,
@@ -55,37 +27,17 @@ const createUser = async (
             nickname,
             tokens,
             role: 'free',
-            is_active: true
+            is_active: false,
+            sms
         });
     } catch (error) {
+        if (error.message === 'Username already exists') {
+            throw error;
+        }
         throw new Error(`Error creating user: ${error.message}`);
     }
 };
 
-const deactivateUser = async (userId) => {
-    try {
-        return await User.update(
-            { is_active: false },
-            { where: { id: userId } }
-        );
-    } catch (error) {
-        throw new Error(`Error deactivating user: ${error.message}`);
-    }
-};
-
-const changeUserRole = async (userId, newRole) => {
-    try {
-        if (!['free', 'premium', 'admin'].includes(newRole)) {
-            throw new Error('Invalid role');
-        }
-        return await User.update(
-            { role: newRole },
-            { where: { id: userId } }
-        );
-    } catch (error) {
-        throw new Error(`Error updating user role: ${error.message}`);
-    }
-};
 
 const createRequest = async (
     userId, 
@@ -107,7 +59,6 @@ const createRequest = async (
         throw new Error(`Error creating request: ${error.message}`);
     }
 };
-
 
 const verifyUserAndPassword = async (username, password) => {
     try {
@@ -134,34 +85,6 @@ const getAllUsers = async () => {
         return users;
     } catch (error) {
         throw new Error(`Error getting all users: ${error.message}`);
-    }
-};
-
-const addTokenToUser = async (userId, token) => {
-    try {
-        const user = await User.findByPk(userId);
-        
-        if (user) {
-
-            user.tokens = token;
-            await user.save();
-        } else {
-            throw new Error('User not found');
-        }
-    } catch (error) {
-        throw new Error(`Error adding token to user: ${error.message}`);
-    }
-};
-
-const getTokenFromUser = async (userId) => {
-    try {
-        const user = await User.findByPk(userId, {
-            attributes: ['tokens'],
-            raw: true
-        });
-        return user ? user.tokens : null;
-    } catch (error) {
-        throw new Error(`Error getting token from user: ${error.message}`);
     }
 };
 
@@ -201,10 +124,162 @@ const getUserIdFromToken = async (token) => {
     }
 };
 
+
+const activateUser = async (username) => {
+    try {
+        return await User.update(
+            { is_active: true },
+            { where: { username } }
+        );
+    } catch (error) {
+        throw new Error(`Error activating user: ${error.message}`);
+    }
+};
+
+const deactivateUser = async (username) => {
+    try {
+        return await User.update(
+            { is_active: false },
+            { where: { username } }
+        );
+    } catch (error) {
+        throw new Error(`Error deactivating user: ${error.message}`);
+    }
+};
+
+const addSmsToUser = async (username, sms) => {
+    try {
+        return await User.update(
+            { sms },
+            { where: { username } }
+        );
+    } catch (error) {
+        throw new Error(`Error adding SMS to user: ${error.message}`);
+    }
+};
+
+const verifySmsFromUser = async (username, sms) => {
+    try {
+        const user = await User.findOne({
+            where: { username, sms },
+            raw: true
+        });
+        if (user) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        throw new Error(`Error verifying SMS: ${error.message}`);
+    }
+};
+
+const getUserRequests = async (username) => {
+    try {
+        const user = await User.findOne({ where: { username } });
+        const requests = await Request.findAll({
+            where: { user_id: user.id },
+            order: [['prompt_date', 'DESC']],
+            raw: true
+        });
+        return requests;
+    } catch (error) {
+        throw new Error(`Error getting user requests: ${error.message}`);
+    }
+};
+
+const getUserRole = async (username) => {
+    try {
+        const user = await User.findOne({
+            where: { username },
+            attributes: ['role'],
+            raw: true
+        });
+        return user;
+    } catch (error) {
+        throw new Error(`Error getting user role: ${error.message}`);
+    }
+};
+
+const getUserPassword = async (username) => {
+    try {
+        const user = await User.findOne({
+            where: { username },
+            attributes: ['password'],
+            raw: true
+        });
+        return user;
+    } catch (error) {
+        throw new Error(`Error getting user password: ${error.message}`);
+    }
+};
+
+const changeUserRole = async (username, newRole) => {
+    try {
+        if (!['free', 'premium', 'admin'].includes(newRole)) {
+            throw new Error('Invalid role');
+        }
+        return await User.update(
+            { role: newRole },
+            { where: { username } }
+        );
+    } catch (error) {
+        throw new Error(`Error updating user role: ${error.message}`);
+    }
+};
+
+const addTokenToUser = async (username, token) => {
+    try {
+        const user = await User.findOne({ where: { username } });
+        if (user) {
+            user.tokens = token;
+            await user.save();
+        } else {
+            throw new Error('User not found');
+        }
+    } catch (error) {
+        throw new Error(`Error adding token to user: ${error.message}`);
+    }
+};
+
+const getTokenFromUser = async (username) => {
+    try {
+        const user = await User.findOne({
+            where: { username },
+            attributes: ['tokens'],
+            raw: true
+        });
+        return user ? user.tokens : null;
+    } catch (error) {
+        throw new Error(`Error getting token from user: ${error.message}`);
+    }
+};
+
+const getUserPhone = async (username) => {
+    try {
+        const user = await User.findOne({
+            where: { username },
+            attributes: ['phone_number'],
+            raw: true
+        });
+        
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        if (!user.phone_number) {
+            throw new Error('User has no phone number');
+        }
+
+        return user.phone_number;
+    } catch (error) {
+        throw new Error(`Error getting user phone: ${error.message}`);
+    }
+};
+
 module.exports = {
     createUser,
     deactivateUser,
-    changeUserRole,
+    activateUser,    changeUserRole,
     createRequest,
     getUserRequests,
     getUserRole,
@@ -213,5 +288,8 @@ module.exports = {
     addTokenToUser,
     getTokenFromUser,
     getUserIdFromToken,
+    addSmsToUser,
+    verifySmsFromUser,
+    getUserPhone,
     verifyUserAndPassword
 };

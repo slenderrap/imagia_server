@@ -38,17 +38,18 @@ app.post('/api/usuaris/registrar', async (req, res) => {
 app.post('/api/admin/usuaris/login', [authMiddleware], async (req, res) => {
     try {
         const { username, password } = req.body;
-        
         if (!username || !password) {
             return res.status(400).send(createResponse("ERROR", "Username and password must be provided"));
         }
         const token = await verifyUserAndPassword(username, password);
-        if (token) {
-            return res.send(createResponse("OK", "Login successful", { token }));
-        } else {
+        if (!token) {
             return res.status(401).send(createResponse("ERROR", "Invalid username or password"));
         }
-        
+        const isAdmin = await verifyAdminToken(token);
+        if (!isAdmin) {
+            return res.status(403).send(createResponse("ERROR", "User is not an admin"));
+        }
+        return res.send(createResponse("OK", "Admin login successful", { token }));
     } catch (error) {
         console.error(error);
         res.status(500).send(createResponse("ERROR", `Login error: ${error.message}`));

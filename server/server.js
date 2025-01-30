@@ -35,7 +35,7 @@ app.post('/api/usuaris/registrar', async (req, res) => {
 });
 
 //Endpoint for login
-app.post('/api/admin/usuaris/login', [authMiddleware], async (req, res) => {
+app.post('/api/admin/usuaris/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {

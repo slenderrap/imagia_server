@@ -33,15 +33,11 @@ app.post('/api/admin/usuaris/login', [authMiddleware], async (req, res) => {
         if (!username || !password) {
             return res.status(400).send(createResponse("ERROR", "Username and password must be provided"));
         }
-
         const token = await verifyUserAndPassword(username, password);
-        const isAdmin = await verifyAdminToken(token);
-
-        if (isAdmin) {
-            return res.send(createResponse("OK", "Admin login successful", { token }));
+        if (token) {
+            return res.send(createResponse("OK", "Login successful", { token }));
         } else {
-            // Pass para usuarios no admin - to do-
-            return res.status(403).send(createResponse("ERROR", "User is not an admin"));
+            return res.status(401).send(createResponse("ERROR", "Invalid username or password"));
         }
         
     } catch (error) {

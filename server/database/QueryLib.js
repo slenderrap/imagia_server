@@ -276,6 +276,19 @@ const getUserPhone = async (username) => {
     }
 };
 
+
+const verifyToken = async (token) => {
+    try {
+        const user = await User.findOne({
+            where: { tokens: token },
+            raw: true
+        });
+        return user !== null;
+    } catch (error) {
+        throw new Error(`Error verifying token: ${error.message}`);
+    }
+};
+
 module.exports = {
     createUser,
     deactivateUser,
@@ -291,5 +304,6 @@ module.exports = {
     addSmsToUser,
     verifySmsFromUser,
     getUserPhone,
+    verifyToken,
     verifyUserAndPassword
 };

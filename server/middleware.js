@@ -1,6 +1,8 @@
 const { createResponse } = require('./utils.js');
+const { verifyToken } = require('./database/QueryLib.js');
 
-const authMiddleware = (req, res, next) => {
+
+const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
 
     if (!authHeader) {
@@ -16,8 +18,8 @@ const authMiddleware = (req, res, next) => {
     }
 
     const token = authHeader.substring(7);
-
-    if (token !== 'ABCD1234EFGH5678IJKL') {
+    const isValidToken = await verifyToken(token);
+    if (!isValidToken) {
         return res.status(401).json(
             createResponse('ERROR', 'Token invàlid')
         );

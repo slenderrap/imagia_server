@@ -44,7 +44,7 @@ const createUserModel = () => {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: null
-  }
+  },
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

@@ -305,5 +305,6 @@ module.exports = {
     verifySmsFromUser,
     getUserPhone,
     verifyToken,
-    verifyUserAndPassword
+    verifyUserAndPassword,
+    verifyAdminToken
 };

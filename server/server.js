@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
-const { createUser } = require('./database/QueryLib.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken } = require('./database/QueryLib.js');
 const path = require('path');
 
 const hostname = '0.0.0.0';

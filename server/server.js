@@ -20,13 +20,13 @@ app.get('/api/api-docs', (req, res) => {
 // Endpoint to register a user
 app.post('/api/usuaris/registrar', async (req, res) => {
     try {
-        const {telefon, nickname, email, contrasenya} = req.body;
+        const {username, telefon, nickname, email, contrasenya} = req.body;
         
-        if (!telefon || !nickname || !email || !contrasenya) {
+        if (!username || !telefon || !nickname || !email || !contrasenya) {
             return res.status(400).send(createResponse("ERROR", "All fields are required"));
         }
 
-        await createUser(nickname, email, contrasenya, telefon, nickname, null, null);
+        await createUser(username, email, contrasenya, telefon, nickname, null, null);
         res.send(createResponse("OK", "User registered successfully", {"name": nickname, "email": email}));
     } catch (error) {
         console.error(error);

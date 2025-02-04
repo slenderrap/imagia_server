@@ -213,15 +213,21 @@ const getUserPassword = async (username) => {
     }
 };
 
-const changeUserRole = async (username, newRole) => {
+const changeUserRole = async (searchCriteria, newRole) => {
     try {
         if (!['free', 'premium', 'admin'].includes(newRole)) {
             throw new Error('Invalid role');
         }
-        return await User.update(
+        const result = await User.update(
             { role: newRole },
-            { where: { username } }
+            { where: searchCriteria }
         );
+        
+        if (result[0] === 0) {
+            throw new Error('No user matched the provided criteria');
+        }
+
+        return result;
     } catch (error) {
         throw new Error(`Error updating user role: ${error.message}`);
     }
@@ -306,5 +312,6 @@ module.exports = {
     getUserPhone,
     verifyToken,
     verifyUserAndPassword,
-    verifyAdminToken
+    verifyAdminToken,
+    getAllUsers
 };

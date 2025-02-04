@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
-const { createUser, verifyUserAndPassword, verifyAdminToken } = require('./database/QueryLib.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, getAllUsers } = require('./database/QueryLib.js');
 const path = require('path');
 
 const hostname = '0.0.0.0';
@@ -157,25 +157,30 @@ app.get("/api", (req, res) => {
 //Endpoint to update acount type: Admin, Premium,, Free
 app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res) => {
     try {
-        const { token, username, plan } = req.body;
-        if (!token || !username || !plan) {
-            return res.status(400).send(createResponse("ERROR", "Token, username, and plan must be provided"));
+        const { token, username, telefon, email, pla } = req.body;
+        if (!token || !pla || (!username && !telefon && !email)) {
+            return res.status(400).send(createResponse("ERROR", "Token, plan and at least one of username, telefon, or email must be provided"));
         }
         const isAdmin = await verifyAdminToken(token);
         if (!isAdmin) {
             return res.status(403).send(createResponse("ERROR", "Token does not belong to an admin"));
         }
-        const user = await User.findOne({ where: { username }, raw: true });
-        if (!user) {
-            return res.status(404).send(createResponse("ERROR", "User not found"));
-        }
+        // const user = await User.findOne({ where: { username }, raw: true });
+        // if (!user) {
+        //     return res.status(404).send(createResponse("ERROR", "User not found"));
+        // }
         const validRoles = ['free', 'premium', 'admin'];
-        if (!validRoles.includes(plan)) {
+        if (!validRoles.includes(pla)) {
             return res.status(400).send(createResponse("ERROR", "Invalid role provided"));
         }
 
-        await changeUserRole(username, plan);
-        res.send(createResponse("OK", "User plan updated successfully", { username, plan }));
+        const searchCriteria = {};
+        if (username) searchCriteria.username = username;
+        if (telefon) searchCriteria.telefon = telefon;
+        if (email) searchCriteria.email = email;
+
+        await changeUserRole(searchCriteria, pla);
+        res.send(createResponse("OK", "User plan updated successfully", { username, pla }));
     } catch (error) {
         console.error(error);
         res.status(500).send(createResponse("ERROR", `Error updating user plan: ${error.message}`));

@@ -1,266 +1,186 @@
 openapi: 3.0.0
 info:
-  title: Mi API
+  title: API d'Usuaris
+  description: API per gestionar usuaris, administradors i validació amb SMS.
   version: 1.0.0
-  description: API para gestionar usuarios y analizar imágenes.
 servers:
-  - url: http://0.0.0.0:3000
-    description: Servidor local
+  - url: http://0.0.0.0:3000/api
 paths:
-  /api/usuaris/registrar:
+  /api-docs:
+    get:
+      summary: Obtenir documentació de l'API
+      responses:
+        '200':
+          description: Retorna la documentació de l'API
+  /usuaris/registrar:
     post:
-      summary: Registrar un nuevo usuario
-      description: Registra un nuevo usuario con su teléfono, nickname, email y contraseña.
+      summary: Registrar un usuari
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [username, telefon, nickname, email, contrasenya]
               properties:
+                username:
+                  type: string
                 telefon:
                   type: string
-                  description: Número de teléfono del usuario.
                 nickname:
                   type: string
-                  description: Nombre de usuario.
                 email:
                   type: string
-                  format: email
-                  description: Correo electrónico del usuario.
                 contrasenya:
                   type: string
-                  description: Contraseña del usuario.
-              required:
-                - telefon
-                - nickname
-                - email
-                - contrasenya
       responses:
         '200':
-          description: Usuario registrado correctamente.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
-                  message:
-                    type: string
-                    example: Usuari registrat correctament
-                  data:
-                    type: object
-                    properties:
-                      nom:
-                        type: string
-                        example: johndoe
-                      email:
-                        type: string
-                        example: johndoe@example.com
-
-  /api/usuaris/validar:
+          description: Usuari registrat correctament
+  /admin/usuaris/login:
     post:
-      summary: Validar un usuario
-      description: Valida un usuario con su teléfono y código de validación.
+      summary: Iniciar sessió com a administrador
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [username, password]
               properties:
-                telefon:
+                username:
                   type: string
-                  description: Número de teléfono del usuario.
-                codi_validacio:
+                password:
                   type: string
-                  description: Código de validación.
-              required:
-                - telefon
-                - codi_validacio
       responses:
         '200':
-          description: Usuario validado correctamente.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
-                  message:
-                    type: string
-                    example: Usuari validat correctament
-                  data:
-                    type: object
-                    properties:
-                      api_key:
-                        type: string
-                        example: 1234567890
-
-  /api/usuaris/perfil:
-    get:
-      summary: Obtener el perfil del usuario
-      description: Obtiene el perfil del usuario autenticado.
-      security:
-        - ApiKeyAuth: []
-      responses:
-        '200':
-          description: Perfil del usuario.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
-                  message:
-                    type: string
-                    example: Perfil del usuario
-                  data:
-                    type: object
-                    properties:
-                      nom:
-                        type: string
-                        example: johndoe
-                      email:
-                        type: string
-                        example: johndoe@example.com
-
-  /api/analitzar-imatge:
+          description: Inici de sessió correcte
+  /usuaris/validar:
     post:
-      summary: Analizar una imagen
-      description: Analiza una imagen utilizando un modelo de visión artificial.
-      security:
-        - ApiKeyAuth: []
+      summary: Validar un usuari mitjançant SMS
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+      responses:
+        '200':
+          description: SMS de validació enviat correctament
+  /usuaris/sms:
+    post:
+      summary: Validar un SMS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, sms]
+              properties:
+                username:
+                  type: string
+                sms:
+                  type: string
+      responses:
+        '200':
+          description: Usuari validat correctament
+  /usuaris/perfil:
+    get:
+      summary: Obtenir el perfil de l'usuari
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil d'usuari retornat correctament
+  /analitzar-imatge:
+    post:
+      summary: Analitzar una imatge
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt, stream, images]
               properties:
                 prompt:
                   type: string
-                  description: Descripción de la tarea a realizar con la imagen.
                 stream:
                   type: boolean
-                  description: Indica si la respuesta debe ser transmitida en tiempo real.
                 images:
                   type: array
                   items:
                     type: string
-                    format: binary
-                  description: Lista de imágenes en formato base64.
-              required:
-                - prompt
-                - images
       responses:
         '200':
-          description: Imagen analizada correctamente.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
-                  message:
-                    type: string
-                    example: Maria image processed
-                  data:
-                    type: string
-                    example: "Resultado del análisis de la imagen"
-        '400':
-          description: Datos de entrada inválidos.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ERROR
-                  message:
-                    type: string
-                    example: Invalid input data
-
-  /api:
-    get:
-      summary: Verificar el estado de la API
-      description: Verifica si la API está funcionando correctamente.
-      responses:
-        '200':
-          description: API funcionando correctamente.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: OK
-                  message:
-                    type: string
-                    example: API working correctly
-
-  /api/admin/usuaris/pla/actualitzar:
+          description: Imatge processada correctament
+  /admin/usuaris/pla/actualitzar:
     post:
-      summary: Actualizar el plan de un usuario
-      description: Permite a un administrador actualizar el plan de un usuario.
+      summary: Actualitzar el pla d'un usuari
       security:
-        - ApiKeyAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [token, pla]
               properties:
                 token:
                   type: string
-                  description: Token de autenticación del administrador.
                 username:
                   type: string
-                  description: Nombre de usuario a modificar.
-                plan:
+                telefon:
                   type: string
-                  enum: [free, premium, admin]
-                  description: Nuevo plan del usuario.
-              required:
-                - token
-                - username
-                - plan
+                email:
+                  type: string
+                pla:
+                  type: string
       responses:
         '200':
-          description: Plan del usuario actualizado correctamente.
-        '400':
-          description: Datos inválidos o plan inexistente.
-        '403':
-          description: Token no pertenece a un administrador.
-        '404':
-          description: Usuario no encontrado.
-
-  /api/admin/usuaris:
+          description: Pla de l'usuari actualitzat correctament
+  /admin/usuaris:
     get:
-      summary: Obtener lista de usuarios
-      description: Permite a un administrador obtener la lista de todos los usuarios registrados en la base de datos.
+      summary: Llistar tots els usuaris
       security:
-        - ApiKeyAuth: []
+        - bearerAuth: []
       responses:
         '200':
-          description: Lista de usuarios obtenida.
-        '500':
-          description: Error al obtener la lista de usuarios.
-
-securitySchemes:
-  ApiKeyAuth:
-    type: apiKey
-    in: header
-    name: Authorization
-    description: Clave API para autenticación.
+          description: Usuaris recuperats correctament
+  /usuaris/quota:
+    get:
+      summary: Obtenir quota de l'usuari
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quota d'usuari recuperada correctament
+  /admin/usuaris/quota:
+    get:
+      summary: Obtenir quota de tots els usuaris (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quota de tots els usuaris recuperada correctament
+  /admin/usuaris/quota/actualitzar:
+    post:
+      summary: Actualitzar quota d'usuari
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quota d'usuari actualitzada correctament
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

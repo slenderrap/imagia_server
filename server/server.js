@@ -2,7 +2,8 @@ const express = require('express');
 const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
-const { createUser, getUserIdFromToken, createLog, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, sendSms, isValidSms, addTokenToUser, activateUser, getUserRole, getAllUsers } = require('./database/QueryLib.js');
+const {sendSms} = require('./utils.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, addTokenToUser, activateUser, getAllUsers } = require('./database/QueryLib.js');
 const path = require('path');
 
 const hostname = '0.0.0.0';
@@ -89,7 +90,7 @@ app.post('/api/usuaris/sms', async (req, res) => {
         const token = Math.floor(1000000000 + Math.random() * 9000000000);
         await addTokenToUser(username, token);
         await activateUser(username);
-        res.send(createResponse("OK", "User validated successfully", { token }));
+        res.send(createResponse("OK", "User validated successfully", token ));
     } catch (error) {
         console.error(error);
         res.status(500).send(createResponse("ERROR", `Validation error: ${error.message}`));

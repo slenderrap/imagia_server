@@ -3,7 +3,7 @@ const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
 const {sendSms} = require('./utils.js');
-const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, addTokenToUser, activateUser, getAllUsers } = require('./database/QueryLib.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, countUserRequests, createRequest, getAllUsers } = require('./database/QueryLib.js');
 const path = require('path');
 
 const hostname = '0.0.0.0';

@@ -1,0 +1,186 @@
+openapi: 3.0.0
+info:
+  title: API d'Usuaris
+  description: API per gestionar usuaris, administradors i validació amb SMS.
+  version: 1.0.0
+servers:
+  - url: http://0.0.0.0:3000/api
+paths:
+  /api-docs:
+    get:
+      summary: Obtenir documentació de l'API
+      responses:
+        '200':
+          description: Retorna la documentació de l'API
+  /usuaris/registrar:
+    post:
+      summary: Registrar un usuari
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, telefon, nickname, email, contrasenya]
+              properties:
+                username:
+                  type: string
+                telefon:
+                  type: string
+                nickname:
+                  type: string
+                email:
+                  type: string
+                contrasenya:
+                  type: string
+      responses:
+        '200':
+          description: Usuari registrat correctament
+  /admin/usuaris/login:
+    post:
+      summary: Iniciar sessió com a administrador
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Inici de sessió correcte
+  /usuaris/validar:
+    post:
+      summary: Validar un usuari mitjançant SMS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+      responses:
+        '200':
+          description: SMS de validació enviat correctament
+  /usuaris/sms:
+    post:
+      summary: Validar un SMS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, sms]
+              properties:
+                username:
+                  type: string
+                sms:
+                  type: string
+      responses:
+        '200':
+          description: Usuari validat correctament
+  /usuaris/perfil:
+    get:
+      summary: Obtenir el perfil de l'usuari
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil d'usuari retornat correctament
+  /analitzar-imatge:
+    post:
+      summary: Analitzar una imatge
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt, stream, images]
+              properties:
+                prompt:
+                  type: string
+                stream:
+                  type: boolean
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Imatge processada correctament
+  /admin/usuaris/pla/actualitzar:
+    post:
+      summary: Actualitzar el pla d'un usuari
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, pla]
+              properties:
+                token:
+                  type: string
+                username:
+                  type: string
+                telefon:
+                  type: string
+                email:
+                  type: string
+                pla:
+                  type: string
+      responses:
+        '200':
+          description: Pla de l'usuari actualitzat correctament
+  /admin/usuaris:
+    get:
+      summary: Llistar tots els usuaris
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuaris recuperats correctament
+  /usuaris/quota:
+    get:
+      summary: Obtenir quota de l'usuari
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quota d'usuari recuperada correctament
+  /admin/usuaris/quota:
+    get:
+      summary: Obtenir quota de tots els usuaris (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quota de tots els usuaris recuperada correctament
+  /admin/usuaris/quota/actualitzar:
+    post:
+      summary: Actualitzar quota d'usuari
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quota d'usuari actualitzada correctament
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -56,7 +56,7 @@ async function provarPeticioImatge() {
       images: [ await convertImageToBase64(imageBuffer)] 
     };
 
-    const response = await axios.post('http://localhost:3000/api/analitzar-imatge', 
+    const response = await axios.post('https://imagia5.ieti.site/api/analitzar-imatge', 
       peticioData,
       {
         headers: {
@@ -90,7 +90,7 @@ async function provarPeticioInvalida() {
       imatges: ["base64_encoded_image1"]
     };
 
-    const response = await axios.post('http://localhost:3000/api/analitzar-imatge', 
+    const response = await axios.post('https://imagia5.ieti.site/api/analitzar-imatge', 
       peticioData,
       {
         headers: {
@@ -117,7 +117,7 @@ async function testUserCreation() {
   }
 }
 
-// provarPeticioImatge();
+provarPeticioImatge();
 // provarPeticioInvalida();
 
-testUserCreation();
+// testUserCreation();

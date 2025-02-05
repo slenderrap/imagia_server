@@ -1,4 +1,4 @@
-const {User, Request} = require('./index');
+const {User, Logs, Request} = require('./index');
 
 
 const createUser = async (
@@ -187,10 +187,10 @@ const getUserRequests = async (username) => {
     }
 };
 
-const getUserRole = async (username) => {
+const getUserRole = async (userId) => {
     try {
         const user = await User.findOne({
-            where: { username },
+            where: { userId },
             attributes: ['role'],
             raw: true
         });
@@ -295,10 +295,40 @@ const verifyToken = async (token) => {
     }
 };
 
+const createLog = async (tag, username = null, response = null) => {
+    try {
+        return await Logs.create({
+            log_date: new Date(),            tag,
+            username,
+            response
+        });
+    } catch (error) {
+        throw new Error(`Error inserting log: ${error.message}`);
+    }
+};
+
+const countUserRequests = async (userId) => {
+    try {
+        const count = await Request.count({
+            where: {
+                user_id: userId,
+                prompt_date: {
+                    [Op.gte]: new Date(Date.now() - 24 * 60 * 60 * 1000)                }
+            }
+        });
+        return count;
+    } catch (error) {
+        throw new Error(`Error counting user requests: ${error.message}`);
+    }
+};
+
+
 module.exports = {
     createUser,
     deactivateUser,
-    activateUser,    changeUserRole,
+    activateUser,
+    createLog,
+    changeUserRole,
     createRequest,
     getUserRequests,
     getUserRole,
@@ -313,5 +343,6 @@ module.exports = {
     verifyToken,
     verifyUserAndPassword,
     verifyAdminToken,
+    countUserRequests,
     getAllUsers
 };

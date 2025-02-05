@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
-const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, sendSms, isValidSms, addTokenToUser, activateUser, getAllUsers } = require('./database/QueryLib.js');
+const { createUser, getUserIdFromToken, createLog, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, sendSms, isValidSms, addTokenToUser, activateUser, getUserRole, getAllUsers } = require('./database/QueryLib.js');
 const path = require('path');
 
 const hostname = '0.0.0.0';
@@ -104,9 +104,20 @@ app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {
 
 // Endpoint to analyze an image
 app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
-
     console.log("Analitzant imatge...");
+    const token = req.headers.authorization?.split(" ")[1];
     const {prompt, stream, images} = req.body;
+    const userId = await getUserIdFromToken(token);
+    if (!userId) {
+        return res.status(403).send(createResponse("ERROR", "Invalid token"));
+    }
+    const userRole = await getUserRole(userId);
+    const requestCount = await countUserRequests(userId);
+    console.log(`User ID: ${userId}, Role: ${userRole}, Requests en 24h: ${requestCount}`);
+    const requestLimits = { free: 5, premium: 10 };
+    if (requestCount >= (requestLimits[userRole] || 0)) {
+        return res.status(429).send(createResponse("ERROR", "Limit de peticions excedit"));
+    }
     console.log("Prompt: ", prompt);
     console.log("Stream: ", stream);
     console.log("Images: ", images);
@@ -128,6 +139,7 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
     })
     if(response.ok) {
         const data = await response.json();
+        await createRequest(userId, prompt, "llama3.2-vision", JSON.stringify(images), data["response"]);
         res.send(createResponse("OK", "Maria image processed", data["response"]));
     }else{
         console.log(response.statusText);

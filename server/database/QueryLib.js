@@ -190,7 +190,7 @@ const getUserRequests = async (username) => {
 const getUserRole = async (userId) => {
     try {
         const user = await User.findOne({
-            where: { userId },
+            where: { id: userId },
             attributes: ['role'],
             raw: true
         });
@@ -322,6 +322,23 @@ const countUserRequests = async (userId) => {
     }
 };
 
+const getUsernameById = async (userId) => {
+    try {
+        const user = await User.findOne({
+            where: { id: userId },
+            attributes: ['username'],
+            raw: true
+        });
+        if (user) {
+            return user.username;
+        } else {
+            throw new Error('User not found');
+        }
+    } catch (error) {
+        throw new Error(`Error getting username from userId: ${error.message}`);
+    }
+};
+
 
 module.exports = {
     createUser,
@@ -343,6 +360,7 @@ module.exports = {
     verifyToken,
     verifyUserAndPassword,
     verifyAdminToken,
+    getUsernameById,
     countUserRequests,
     getAllUsers
 };

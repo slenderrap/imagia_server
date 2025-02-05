@@ -1,7 +1,6 @@
 const { createResponse } = require('./utils.js');
 const { verifyToken } = require('./database/QueryLib.js');
 
-
 const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
 

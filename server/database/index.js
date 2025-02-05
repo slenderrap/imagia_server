@@ -11,7 +11,7 @@ User.hasMany(Request, { foreignKey: 'user_id' });
 (async () => {
     try {
       await sequelize.sync({ 
-        alter: true, 
+        alter: false, 
         force: false //! ELIMINAR FORCE EN PRODUCCIÓN
     }); 
       console.log('Modelos sincronizados con éxito.');

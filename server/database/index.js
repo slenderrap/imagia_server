@@ -1,9 +1,8 @@
 const sequelize = require("./database");
-const createUserModel = require("./user");
-const createRequestModel = require("./Request");
+const User  = require("./user");
+const Request = require("./Request");
+const Logs = require("./Logs");
 
-const User = createUserModel(sequelize);
-const Request = createRequestModel(sequelize);
 
 Request.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Request, { foreignKey: 'user_id' });

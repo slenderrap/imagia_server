@@ -5,7 +5,7 @@ const {sequelize} = require('./database/index.js');
 const {sendSms} = require('./utils.js');
 const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers } = require('./database/QueryLib.js');
 const path = require('path');
-
+require('dotenv').config();
 const hostname = '0.0.0.0';
 const port = 3000;
 const app = express();
@@ -132,8 +132,11 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
     const userRole = await getUserRole(userId);
     const requestCount = await countUserRequests(userId);
     console.log(`User ID: ${userId}, Role: ${userRole}, Requests en 24h: ${requestCount}`);
-    const requestLimits = { free: 5, premium: 10 };
-    if (requestCount >= (requestLimits[userRole] || 0)) {
+    const requestLimits = {
+        free: parseInt(process.env.FREE, 10) || 0,
+        premium: parseInt(process.env.PREMIUM, 10) || 0
+    };
+        if (requestCount >= (requestLimits[userRole] || 0)) {
         await createLog("Error", username, "Limit de peticions excedit");
         return res.status(429).send(createResponse("ERROR", "Limit de peticions excedit"));
     }

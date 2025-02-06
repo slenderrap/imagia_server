@@ -1,6 +1,6 @@
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('./database');
-
 
 const createUserModel = () => {
   const User = sequelize.define('User', {
@@ -11,8 +11,7 @@ const createUserModel = () => {
     },
     username: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     password: {
       type: DataTypes.STRING(255),
@@ -28,8 +27,7 @@ const createUserModel = () => {
     },
     email: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     tokens: {
       type: DataTypes.TEXT,
@@ -39,18 +37,20 @@ const createUserModel = () => {
       type: DataTypes.ENUM('free', 'premium', 'admin'),
       defaultValue: 'free'
     },
-
     sms: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: null
-  },
+    },
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     }
   }, {
-    tableName: 'user'
+    tableName: 'user',
+    indexes: [
+      { unique: true, fields: ['username', 'email'] }
+    ]
   });
 
   return User;

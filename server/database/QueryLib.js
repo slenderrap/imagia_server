@@ -176,7 +176,8 @@ const verifySmsFromUser = async (username, sms) => {
 const getUserRequests = async (userId) => {
     try {
         const requests = await Request.findAll({
-            where: { id: userId },
+            where: { user_id: userId },
+            attributes: ['prompt_date', 'prompt', 'answer'],
             order: [['prompt_date', 'DESC']],
             raw: true
         });

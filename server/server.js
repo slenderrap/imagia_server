@@ -3,7 +3,7 @@ const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
 const {sendSms} = require('./utils.js');
-const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers } = require('./database/QueryLib.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, getUserRequests, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers } = require('./database/QueryLib.js');
 const path = require('path');
 require('dotenv').config();
 const hostname = '0.0.0.0';
@@ -112,11 +112,22 @@ app.post('/api/usuaris/sms', async (req, res) => {
     }
 });
 
-//Endpoint  to get user's profile
-app.get('/api/usuaris/perfil', [authMiddleware], (req, res) => {
-    // TODO: Implementar la lògica per obtenir el perfil de l'usuari
-    res.send("Not implemented yet");
+//Endpoint  to get user's historic
+app.get('/api/usuaris/historial', [authMiddleware], async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const userId = await getUserIdFromToken(token);
+        const username = await getUsernameById(userId);
+        const historic = await getUserRequests(userId);
+        await createLog("Historial", username, "Historic fetched successfully");
+        res.send(createResponse("OK", "Historic fetched successfully", historic));
+    } catch (error) {
+        console.error(error);
+        await createLog("Error", username, "Error fetching historic");
+        res.status(500).send(createResponse("ERROR", `Error fetching historic: ${error.message}`));
+    }
 });
+
 
 // Endpoint to analyze an image
 app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {

@@ -177,7 +177,7 @@ const getUserRequests = async (userId) => {
     try {
         const requests = await Request.findAll({
             where: { user_id: userId },
-            attributes: ['prompt_date', 'prompt', 'answer'],
+            attributes: ['prompt_date', 'answer'],
             order: [['prompt_date', 'DESC']],
             raw: true
         });

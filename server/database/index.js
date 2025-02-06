@@ -19,4 +19,4 @@ User.hasMany(Request, { foreignKey: 'user_id' });
     }
   })();
 
-module.exports = {sequelize, User, Request};
+module.exports = {sequelize, User, Logs, Request};

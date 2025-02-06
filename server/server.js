@@ -249,7 +249,25 @@ app.get('/api/admin/usuaris', [authMiddleware], async (req, res) => {
     }
 });
 
-//todo
-app.get('/api/usuaris/quota', [authMiddleware], (req, res) => {});
-app.get('/api/admin/usuaris/quota', [authMiddleware], (req, res) => {});
-app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], (req, res) => {});
+app.post('/api/admin/usuaris/logs', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const isAdmin = await verifyAdminToken(token);
+        if (!isAdmin) {
+            await createLog("Error", username, "User is not an admin");
+            return res.status(403).send(createResponse("ERROR", "User is not an admin"));
+        }
+        const userId = await getUserIdFromToken(token);
+        const username = await getUsernameById(userId);
+
+        const logs = await getLogs();
+        await createLog("Obtenció de logs", username, "Get logs successfully");
+        return res.send(createResponse("OK", "Get logs successfully", { logs }));
+    } catch (error) {
+        console.error(error);
+        await createLog("Error", username, `Error getting logs: ${error.message}`);
+        res.status(500).send(createResponse("ERROR", `Error getting logs: ${error.message}`));
+    }
+});
+
+

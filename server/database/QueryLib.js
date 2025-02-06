@@ -338,6 +338,17 @@ const getUsernameById = async (userId) => {
     }
 };
 
+const getLogs = async () => {
+    try {
+        const logs = await Logs.findAll({
+            order: [['log_date', 'DESC']],
+            raw: true
+        });
+        return logs;
+    } catch (error) {
+        throw new Error(`Error getting all logs: ${error.message}`);
+    }
+};
 
 module.exports = {
     createUser,
@@ -361,5 +372,6 @@ module.exports = {
     verifyAdminToken,
     getUsernameById,
     countUserRequests,
+    getLogs,
     getAllUsers
 };

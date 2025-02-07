@@ -147,7 +147,7 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
         free: parseInt(process.env.FREE, 10) || 0,
         premium: parseInt(process.env.PREMIUM, 10) || 0
     };
-        if (requestCount >= (requestLimits[userRole] || 0)) {
+    if (requestCount >= (requestLimits[userRole] || 0)) {
         await createLog("Error", username, "Limit de peticions excedit");
         return res.status(429).send(createResponse("ERROR", "Limit de peticions excedit"));
     }

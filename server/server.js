@@ -264,12 +264,13 @@ app.post('/api/admin/usuaris/logs', [authMiddleware], async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
         const isAdmin = await verifyAdminToken(token);
+        const userId = await getUserIdFromToken(token);
+        const username = await getUsernameById(userId);
+
         if (!isAdmin) {
             await createLog("Error", username, "User is not an admin");
             return res.status(403).send(createResponse("ERROR", "User is not an admin"));
         }
-        const userId = await getUserIdFromToken(token);
-        const username = await getUsernameById(userId);
 
         const logs = await getLogs();
         await createLog("Obtenció de logs", username, "Get logs successfully");

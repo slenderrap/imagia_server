@@ -1,4 +1,5 @@
 const {User, Logs, Request} = require('./index');
+const { Op } = require("sequelize");
 
 
 const createUser = async (
@@ -298,7 +299,8 @@ const verifyToken = async (token) => {
 const createLog = async (tag, username = null, response = null) => {
     try {
         return await Logs.create({
-            log_date: new Date(),            tag,
+            log_date: new Date(),            
+            tag,
             username,
             response
         });

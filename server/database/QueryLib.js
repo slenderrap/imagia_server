@@ -1,7 +1,6 @@
 const {User, Logs, Request} = require('./index');
 const { Op } = require("sequelize");
 
-
 const createUser = async (
     username, 
     email, 

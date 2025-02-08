@@ -3,7 +3,7 @@ const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
 const {sendSms} = require('./utils.js');
-const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, getUserRequests, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers } = require('./database/QueryLib.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, getUserRequests, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers, getLogs, createLog } = require('./database/QueryLib.js');
 const path = require('path');
 require('dotenv').config();
 const hostname = '0.0.0.0';
@@ -282,4 +282,6 @@ app.post('/api/admin/usuaris/logs', [authMiddleware], async (req, res) => {
     }
 });
 
+app.post('/api/admin/usuaris/logs', [authMiddleware], async (req, res) => {
 
+});

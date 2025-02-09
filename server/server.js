@@ -3,7 +3,7 @@ const authMiddleware = require('./middleware.js');
 const {createResponse} = require('./utils.js');
 const {sequelize} = require('./database/index.js');
 const {sendSms} = require('./utils.js');
-const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, getUserRequests, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers, getLogs, createLog } = require('./database/QueryLib.js');
+const { createUser, verifyUserAndPassword, verifyAdminToken, changeUserRole, addSmsToUser, getUserPhone, verifySmsFromUser, isValidSms, getUserRequests, addTokenToUser, activateUser, getUserIdFromToken, getUserRole, getUsernameById, countUserRequests, createRequest, getAllUsers, getLogs, createLog, getLastHourLogs } = require('./database/QueryLib.js');
 const path = require('path');
 require('dotenv').config();
 const hostname = '0.0.0.0';
@@ -282,6 +282,32 @@ app.post('/api/admin/usuaris/logs', [authMiddleware], async (req, res) => {
     }
 });
 
-app.post('/api/admin/usuaris/logs', [authMiddleware], async (req, res) => {
+app.post('/api/admin/usuaris/logs/counted', [authMiddleware], async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const isAdmin = await verifyAdminToken(token);
+        const userId = await getUserIdFromToken(token);
+        const username = await getUsernameById(userId);
 
+        if (!isAdmin) {
+            await createLog("Error", username, "User is not an admin");
+            return res.status(403).send(createResponse("ERROR", "User is not an admin"));
+        }
+
+        const logs = await getLastHourLogs();
+        const countedLogs = logs.reduce((acc, log) => {
+            if (!acc[log["tag"]]) {
+                acc[log["tag"]] = 1;
+            } else {
+                acc[log["tag"]]++;
+            }
+            return acc;
+        }, {});
+        await createLog("Obtenció de logs", username, "Get logs successfully");
+        return res.send(createResponse("OK", "Get logs successfully", countedLogs ));
+    } catch (error) {
+        console.error(error);
+        await createLog("Error", username, `Error getting logs: ${error.message}`);
+        res.status(500).send(createResponse("ERROR", `Error getting logs: ${error.message}`));
+    }
 });

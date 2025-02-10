@@ -215,7 +215,7 @@ const getUserPassword = async (username) => {
 
 const changeUserRole = async (searchCriteria, newRole) => {
     try {
-        if (!['free', 'premium', 'admin'].includes(newRole)) {
+        if (!['free', 'premium', 'admin', 'custom'].includes(newRole)) {
             throw new Error('Invalid role');
         }
         const result = await User.update(
@@ -389,6 +389,18 @@ const getUserCustom = async (userId) => {
     }
 };
 
+const updatePlan = async (username, custom) => {
+    try {
+        console.log("Entra function")
+        return await User.update(
+            { custom },
+            { where: { username } }
+        );
+    } catch (error) {
+        throw new Error(`Error updating plan: ${error.message}`);
+    }
+}
+
 module.exports = {
     createUser,
     deactivateUser,
@@ -414,5 +426,6 @@ module.exports = {
     getLogs,
     getAllUsers,
     getUserCustom,
-    getLastHourLogs
+    getLastHourLogs,
+    updatePlan
 };

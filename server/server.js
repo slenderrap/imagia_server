@@ -209,10 +209,11 @@ app.get("/api", (req, res) => {
 
 
 
-//Endpoint to update acount type: Admin, Premium,, Free
+//Endpoint to update acount type: Admin, Premium, Free, Custom
 app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res) => {
+    const { token, username, telefon, email, pla } = req.body;
     try {
-        const { token, username, telefon, email, pla } = req.body;
+        
         const userId = await getUserIdFromToken(token);
         const userName = await getUsernameById(userId);
     
@@ -230,7 +231,7 @@ app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res
         // if (!user) {
         //     return res.status(404).send(createResponse("ERROR", "User not found"));
         // }
-        const validRoles = ['free', 'premium', 'admin'];
+        const validRoles = ['free', 'premium', 'admin', 'custom'];
         if (!validRoles.includes(pla)) {
             await createLog("Error", userName, "Invalid role provided");
             return res.status(400).send(createResponse("ERROR", "Invalid role provided"));
@@ -242,11 +243,11 @@ app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res
         if (email) searchCriteria.email = email;
 
         await changeUserRole(searchCriteria, pla);
-        await createLog("Actualitzar pla", userName, "User plan updated successfully");
+        await createLog("Actualitzar pla", username, "User plan updated successfully");
         res.send(createResponse("OK", "User plan updated successfully", { username, pla }));
     } catch (error) {
         console.error(error);
-        await createLog("Error", userName, "Error updating user plan: ${error.message}");
+        await createLog("Error", username, "Error updating user plan: ${error.message}");
         res.status(500).send(createResponse("ERROR", `Error updating user plan: ${error.message}`));
     }
 });

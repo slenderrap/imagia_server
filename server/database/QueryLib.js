@@ -371,6 +371,24 @@ const getLastHourLogs = async () => {
     }
 }
 
+const getUserCustom = async (userId) => {
+    try {
+        const user = await User.findOne({
+            where: { id: userId },
+            attributes: ['custom'],
+            raw: true
+        });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return user.custom;
+    } catch (error) {
+        throw new Error(`Error getting user custom value: ${error.message}`);
+    }
+};
+
 module.exports = {
     createUser,
     deactivateUser,
@@ -395,5 +413,6 @@ module.exports = {
     countUserRequests,
     getLogs,
     getAllUsers,
+    getUserCustom,
     getLastHourLogs
 };

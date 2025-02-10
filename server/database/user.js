@@ -34,7 +34,7 @@ const User = sequelize.define('User', {
     allowNull: true
   },
   role: {
-    type: DataTypes.ENUM('free', 'premium', 'admin'),
+    type: DataTypes.ENUM('free', 'premium', 'custom', 'admin'),
     defaultValue: 'free'
   },
   sms: {
@@ -42,6 +42,12 @@ const User = sequelize.define('User', {
     allowNull: true,
     defaultValue: null
   },
+  custom: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null
+  },
+
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: false

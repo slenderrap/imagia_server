@@ -194,7 +194,7 @@ const getUserRole = async (userId) => {
             attributes: ['role'],
             raw: true
         });
-        return user;
+        return user.role;
     } catch (error) {
         throw new Error(`Error getting user role: ${error.message}`);
     }

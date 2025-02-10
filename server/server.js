@@ -147,6 +147,9 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
         free: parseInt(process.env.FREE, 10) || 0,
         premium: parseInt(process.env.PREMIUM, 10) || 0
     };
+    if (userRole === 'custom') {
+        requestLimits.custom = await getUserCustom(userId);
+    }
     console.log("Limite de peticiones: ",requestLimits);
     console.log("Rol usuario: ",userRole)
 

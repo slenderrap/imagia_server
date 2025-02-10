@@ -315,3 +315,22 @@ app.post('/api/admin/usuaris/logs/counted', [authMiddleware], async (req, res) =
         res.status(500).send(createResponse("ERROR", `Error getting logs: ${error.message}`));
     }
 });
+
+app.post('/api/admin/usuaris/quota/actualitzar', [authMiddleware], async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const isAdmin = await verifyAdminToken(token);
+        const userId = await getUserIdFromToken(token);
+        const username = await getUsernameById(userId);
+
+        if(!isAdmin) {
+            await createLog("Error", username, `User is not an admin`);
+            return res.status(304).send(createResponse("ERROR", `User is not an admin`));
+        }
+
+        // TODO
+    } catch (error) {
+        await createLog("Error", username, `Error updating plan: ${error.message}`);
+        res.status(500).send(createResponse("ERROR", `Error updating plan: ${error.message}`))
+    }
+})

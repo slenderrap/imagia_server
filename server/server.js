@@ -178,9 +178,10 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
         const data = await response.json();
         await createLog("Resposta", username, data["response"]);
         await createRequest(userId, prompt, "llama3.2-vision", JSON.stringify(images), data["response"]);
+        console.log(data["response"]);
         res.send(createResponse("OK", "Maria image processed", data["response"]));
     }else{
-        console.log(response.statusText);
+        console.log("Error processant imatge: ",response.statusText);
         await createLog("Error", username, "Error processing image");
         res.send(createResponse(`ERROR ${response.status}`, "Error processing image",response.json()));
     }

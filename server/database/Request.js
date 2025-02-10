@@ -17,7 +17,7 @@ const Request = sequelize.define('Request', {
     allowNull: false
   },
   picture: {
-    type: DataTypes.TEXT,
+    type: DataTypes.TEXT("long"),
     allowNull: true
   },
   answer: {

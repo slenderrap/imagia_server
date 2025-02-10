@@ -352,6 +352,25 @@ const getLogs = async () => {
     }
 };
 
+const getLastHourLogs = async () => {
+    try {
+
+        const oneHourAgo = new Date();
+        oneHourAgo.setHours(oneHourAgo.getHours() -1 );
+
+        const logs = await Logs.findAll({
+            where: {
+                log_date: {
+                    [Op.gte]: oneHourAgo
+                }
+            }
+        })
+        return logs;
+    } catch (error) {
+        throw new Error(`Error getting all logs: ${error.message}`)
+    }
+}
+
 module.exports = {
     createUser,
     deactivateUser,
@@ -375,5 +394,6 @@ module.exports = {
     getUsernameById,
     countUserRequests,
     getLogs,
-    getAllUsers
+    getAllUsers,
+    getLastHourLogs
 };

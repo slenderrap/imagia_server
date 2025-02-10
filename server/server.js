@@ -141,7 +141,11 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
         return res.status(403).send(createResponse("ERROR", "Invalid token"));
     }
     const userRole = await getUserRole(userId);
+    if (userRole === 'custom') {
+        const customQuota = await getUserCustom(userId);
+    }
     const requestCount = await countUserRequests(userId);
+
     console.log(`User ID: ${userId}, Role: ${userRole}, Requests en 24h: ${requestCount}`);
     const requestLimits = {
         free: parseInt(process.env.FREE, 10) || 0,

@@ -150,8 +150,6 @@ app.post('/api/analitzar-imatge', [authMiddleware], async (req, res) => {
     if (userRole === 'custom') {
         requestLimits.custom = await getUserCustom(userId);
     }
-    console.log("Limite de peticiones: ",requestLimits);
-    console.log("Rol usuario: ",userRole)
 
     if (requestCount >= (requestLimits[userRole] || 0)) {
         await createLog("Error", username, "Limit de peticions excedit");
@@ -254,18 +252,30 @@ app.post('/api/admin/usuaris/pla/actualitzar', [authMiddleware], async (req, res
 
 //Endpoint to list users
 app.get('/api/admin/usuaris', [authMiddleware], async (req, res) => {
-    try {
+    try{
         const token = req.headers.authorization?.split(" ")[1];
         const userId = await getUserIdFromToken(token);
         const username = await getUsernameById(userId);
-        const users = await getAllUsers();
-        await createLog("Llistar usuaris", username, "Users fetched successfully");
-        res.send(createResponse("OK", "Users fetched successfully", users));
-    } catch (error) {
-        console.error(error);
-        await createLog("Error", username, "Error fetching users");
-        res.status(500).send(createResponse("ERROR", `Error fetching users: ${error.message}`));
+        try {
+            const users = getAllUsers().then(async (users) => {
+                return Promise.all(users.map(async (user) => {
+                    const requested = await countUserRequests(user["id"]);
+                    return { ...user, requested };
+                }));
+            });
+            await createLog("Llistar usuaris", username, "Users fetched successfully");
+            res.send(createResponse("OK", "Users fetched successfully", await users));
+        } catch (error) {
+            console.error(error);
+            await createLog("Error", username, "Error fetching users");
+            res.status(500).send(createResponse("ERROR", `Error fetching users: ${error.message}`));
+        }
+    }catch(error) {
+        console.error("Error fetching adminuser")
+        await createLog("Error", "unknown", "Error fetching admin user")
+        res.status(500).send(createResponse("ERROR",`Error fetching admin user: ${error.message}`))
     }
+    
 });
 
 app.post('/api/admin/usuaris/logs', [authMiddleware], async (req, res) => {
